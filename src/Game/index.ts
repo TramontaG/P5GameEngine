@@ -1,4 +1,5 @@
 import p5 from 'p5';
+import game from 'sandbox';
 
 type GameOptions = {
     width: number;
@@ -6,39 +7,41 @@ type GameOptions = {
     fps?: number;
 }
 
-type GameCanvas = p5 & {
-    update: (cb: (canvas: p5) => any) => any;
-}
+type GameCanvas = p5
 
 class Game {
-    fps: number  = 60;
-    instance: GameCanvas;
+    canvas: GameCanvas;
+    gameReady: Promise<boolean>
+    private resolver?: (ready: boolean) => any
 
     constructor(options: GameOptions){
+        this.gameReady = new Promise<boolean>(resolve => {
+            this.resolver = resolve;
+        })
+
         const canvas = new p5((game: p5) => {
             game.setup = () => {
-                game.resizeCanvas(options.width, options.height);
-                game.fill(0);
+                game.resizeCanvas(options.width, options.height, false);
+                game.background(0);
+                console.log("Game ready");
+                this.setGameReady(this.resolver);
             }
+            game.frameRate(options.fps || 60);
             return game;
         }, document.getElementById('root') as HTMLElement);
-
+        
         canvas.createCanvas(options.width, options.height);
-        canvas.setup();
+        
+        this.canvas = canvas;
+    }
 
-        const gameCanvas = {
-            ...canvas,
-            update: (cb: (canvas: p5) => any) => {
-                console.log('updating');
-                cb(canvas);
-            }
-        }
+    setGameReady(resolve?: (ready: boolean) => any) {
+        resolve?.(true);
+    }
 
-        this.fps = options.fps || 60;
-        this.instance = gameCanvas as p5 & {
-            update: (cb: (canvas: p5) => any) => any;
-        };
-    }    
+    set fps(fps: number) {
+        this.canvas.frameRate(fps)
+    }
 }
 
 export default Game;
