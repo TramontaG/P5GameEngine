@@ -1,5 +1,6 @@
+import GameObject from '../gameObject';
 import p5 from 'p5';
-import game from 'sandbox';
+
 
 type GameOptions = {
     width: number;
@@ -12,7 +13,7 @@ type GameCanvas = p5
 class Game {
     canvas: GameCanvas;
     gameReady: Promise<boolean>
-    private resolver?: (ready: boolean) => any
+    private resolver?: (ready: boolean) => any;
 
     constructor(options: GameOptions){
         this.gameReady = new Promise<boolean>(resolve => {
@@ -41,6 +42,7 @@ class Game {
     set fps(fps: number) {
         this.canvas.frameRate(fps)
     }
+
 }
 
 export default Game;

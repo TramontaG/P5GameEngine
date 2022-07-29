@@ -31,7 +31,9 @@ class SceneManager {
 
     renderScenes(){
         this.currentScene.forEach(layer => {
-            layer.render(this.game.canvas);
+            layer.beforeRender(this.game.canvas);
+            layer.render(this.game);
+            layer.afterRender(this.game.canvas);
         }); 
     }
 
