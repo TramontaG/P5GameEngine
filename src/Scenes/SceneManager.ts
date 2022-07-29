@@ -1,60 +1,56 @@
 import Game from "game";
-
-type Scene = {
-    setup: (game: Game["canvas"]) => any;
-    render: (game: Game["canvas"]) => any;
-    onDestroy: (game: Game["canvas"]) => any;
-    _setupAlreadyRan?: boolean;
-}
+import Layer from "./Layer";
 
 type ScenesMap = {
-    [key: string]: Scene;
+    [key: string]: Layer[];
 }
 
 class SceneManager {
     game: Game;
-    activeScenes: Scene[];
     scenesMap: ScenesMap;
-
+    private currentSceneName: keyof ScenesMap = "";
 
     constructor(game: Game){
         this.game = game;
-        this.activeScenes = [];
         this.scenesMap = {};
         
         this.game.canvas.draw = this.renderScenes.bind(this);
     }
 
+    setScene(sceneName: keyof ScenesMap){
+        this.currentSceneName = sceneName;
+    }
+    
+    get currentScene(){
+        return this.scenesMap[this.currentSceneName];
+    }
+
+    getSceneByName(name: keyof ScenesMap){
+        return this.scenesMap[name];
+    }
+
     renderScenes(){
-        this.activeScenes.forEach(scene => {
-            scene.render(this.game.canvas);
-        });
+        this.currentScene.forEach(layer => {
+            layer.render(this.game.canvas);
+        }); 
     }
 
-    pushScene(scene: Scene){
-        scene.setup(this.game.canvas);
-        console.log("scene setup RAN");
-
-        this.activeScenes.push(scene);
+    pushLayerToScene(sceneName: string, layer: Layer){
+        layer.setup(this.game.canvas);
+        this.getSceneByName(sceneName).push(layer);
     }
 
-    popScene(){
-        const lastScene = this.activeScenes.pop();
-        lastScene?.onDestroy(this.game.canvas);
-        if (this.activeScenes.length === 0) 
-            console.warn("Careful! There are no scenes being rendered at the moment")
-        return lastScene;
+    popLayerFromCurrentScene(){
+        const lastLayer = this.currentScene[this.currentScene.length - 1];
+        lastLayer.beforeDestroy(this.game.canvas);
+        this.currentScene.pop();
+        lastLayer.afterDestroy(this.game.canvas);
+        return lastLayer;
     }
 
-    clearAllScenes() {
-        while (this.activeScenes.length > 0) {
-            this.popScene();
-        }
-    }
-
-    setScene(scene: Scene){
-        this.clearAllScenes();
-        this.pushScene(scene);
+    createScene(sceneName: string){
+        if (this.scenesMap[sceneName]) return;
+        this.scenesMap[sceneName] = [];
     }
 }
 

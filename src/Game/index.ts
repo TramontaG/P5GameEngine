@@ -23,7 +23,6 @@ class Game {
             game.setup = () => {
                 game.resizeCanvas(options.width, options.height, false);
                 game.background(0);
-                console.log("Game ready");
                 this.setGameReady(this.resolver);
             }
             game.frameRate(options.fps || 60);
