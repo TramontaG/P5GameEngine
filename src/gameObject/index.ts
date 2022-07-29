@@ -1,3 +1,4 @@
+import Vector2D from "../math/vector2d";
 import Game from "../game";
 import { RenderEvent, SceneRenderFn } from "../Models/Scenes";
 import { emptyRender, emptyRenderEvent } from "../utils/Scenes";
@@ -10,6 +11,8 @@ class GameObject {
     afterRender: RenderEvent;
     beforeDestroy: RenderEvent;
     afterDestroy: RenderEvent;
+    
+    position: Vector2D;
 
     id: string;
 
@@ -22,6 +25,8 @@ class GameObject {
         this.afterDestroy = emptyRenderEvent;
 
         this.id = Math.round(Math.random() * 0xFFFFFFFF).toString(16);
+
+        this.position = new Vector2D(0,0);
     }
 
 
