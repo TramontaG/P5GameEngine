@@ -3,21 +3,25 @@ import Game from "../game";
 import { RenderEvent, SceneRenderFn } from "../Models/Scenes";
 import { emptyRender, emptyRenderEvent } from "../utils/Scenes";
 import {KeyCallbackMap, keyCallbackFn} from '../eventManagers/keyPressed/models';
+import { KeyEvents } from "../eventManagers/keyPressed";
 
 type initOptions = {
-    keyCallbackMap?: KeyCallbackMap
+    keyCallbackMap?: {
+        [key in KeyEvents]?: KeyCallbackMap
+    }
 }
 
 class GameObject {
     private gameInstance: Game;
 
-    render: SceneRenderFn;
     beforeRender: RenderEvent;
     afterRender: RenderEvent;
     beforeDestroy: RenderEvent;
     afterDestroy: RenderEvent;
     
-    keyCallbackMap: KeyCallbackMap
+    public _keyCallbackMap: {
+        [key in KeyEvents]: KeyCallbackMap
+    }
 
     position: Vector2D;
 
@@ -25,13 +29,17 @@ class GameObject {
 
     constructor(gameInstance: Game, options?: initOptions){
         this.gameInstance = gameInstance;
-        this.render = emptyRender;  
         this.beforeRender = emptyRenderEvent;
         this.afterRender = emptyRenderEvent;
         this.beforeDestroy = emptyRenderEvent;
         this.afterDestroy = emptyRenderEvent;
 
-        this.keyCallbackMap = options?.keyCallbackMap || {};
+        this._keyCallbackMap = {
+            [KeyEvents.KeyDown]: {},
+            [KeyEvents.KeyHeld]: {},
+            [KeyEvents.KeyUp]: {},
+            ...options?.keyCallbackMap,
+        };
 
         this.id = Math.round(Math.random() * 0xFFFFFFFF).toString(16);
 
@@ -39,6 +47,16 @@ class GameObject {
         
     }
 
+    set keyCallbackMap(map: {
+        [key in KeyEvents]?: KeyCallbackMap
+    }){
+        this._keyCallbackMap = {
+            ...this._keyCallbackMap,
+            ...map,
+        }
+    }
+
+    render(canvas: Game["canvas"]){}
     
 }
 

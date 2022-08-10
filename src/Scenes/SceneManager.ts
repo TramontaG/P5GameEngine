@@ -12,9 +12,8 @@ class SceneManager {
 
     constructor(game: Game){
         this.game = game;
+        game.addUpdateToQueue(this.renderScenes.bind(this));
         this.scenesMap = {};
-        
-        this.game.canvas.draw = this.renderScenes.bind(this);
     }
 
     setScene(sceneName: keyof ScenesMap){

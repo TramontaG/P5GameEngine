@@ -7,7 +7,8 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "dev": "concurrently \"tsc --watch\" \"parcel index.html\""
+    "dev": "rm -r ./.parcel-cache && concurrently \"tsc --watch\" \"parcel index.html\"",
+    "lines": "Linecounter count --path=\"./src\""
   },
 
   "dependencies": {
