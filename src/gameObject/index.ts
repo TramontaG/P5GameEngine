@@ -14,7 +14,6 @@ type initOptions = {
 class GameObject {
     private gameInstance: Game;
 
-    beforeRender: RenderEvent;
     afterRender: RenderEvent;
     beforeDestroy: RenderEvent;
     afterDestroy: RenderEvent;
@@ -24,15 +23,17 @@ class GameObject {
     }
 
     position: Vector2D;
+    protected rotationAngle: number;
 
     id: string;
 
     constructor(gameInstance: Game, options?: initOptions){
         this.gameInstance = gameInstance;
-        this.beforeRender = emptyRenderEvent;
         this.afterRender = emptyRenderEvent;
         this.beforeDestroy = emptyRenderEvent;
         this.afterDestroy = emptyRenderEvent;
+
+        this.rotationAngle = 0;
 
         this._keyCallbackMap = {
             [KeyEvents.KeyDown]: {},
@@ -56,8 +57,20 @@ class GameObject {
         }
     }
 
+    _render(canvas: Game["canvas"]){
+        canvas.push();
+        canvas.translate(this.position.x, this.position.y);
+        canvas.rotate(this.rotationAngle);
+
+        this.render(canvas);
+
+        canvas.pop();
+    }
+
     render(canvas: Game["canvas"]){}
-    
+    beforeRender(canvas: Game["canvas"]){}
+    onLeftMouseButtonDown(canvas: Game["canvas"], mousePos: Vector2D, e?: MouseEvent){}
+    onLeftMouseButtonHeld(canvas: Game["canvas"], mousePos: Vector2D, e?: MouseEvent){}
 }
 
 export default GameObject;

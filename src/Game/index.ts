@@ -23,6 +23,8 @@ class Game {
             this.resolver = resolve;
         })
 
+        document.getElementById('root')?.addEventListener("contextmenu", e => e.preventDefault());
+
         const canvas = new p5((game: p5) => {
             game.setup = () => {
                 game.resizeCanvas(options.width, options.height, false);

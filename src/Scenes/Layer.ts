@@ -44,7 +44,8 @@ class Layer {
 
     render(game: Game){
         Object.values(this.gameObjects).forEach(gameObject => {
-            gameObject.render(game.canvas);
+            gameObject.beforeRender(game.canvas);
+            gameObject._render(game.canvas);
         });
 
     }
