@@ -1,5 +1,6 @@
 import GameObject from '../gameObject';
 import p5 from 'p5';
+import SceneManager from '../Scenes/SceneManager';
 
 type GameOptions = {
     width: number;
@@ -15,6 +16,7 @@ class Game {
     canvas: GameCanvas;
     gameReady: Promise<boolean>
     updateQueue: UpdateFn[];
+    private sceneManagerInsance?: SceneManager;
 
     private resolver?: (ready: boolean) => any;
 
@@ -41,6 +43,14 @@ class Game {
         
         this.canvas = canvas;
         this.updateQueue = [];
+    }
+
+    public get sceneManager() {
+        return this.sceneManagerInsance as SceneManager;
+    }
+
+    public set sceneManager(sm: SceneManager){
+        this.sceneManagerInsance = sm;
     }
 
     public addUpdateToQueue(update: UpdateFn){

@@ -1,5 +1,5 @@
 import Vector2D from "../math/vector2d";
-import Game from "../game";
+import Game from "../Game";
 import { RenderEvent, SceneRenderFn } from "../Models/Scenes";
 import { emptyRender, emptyRenderEvent } from "../utils/Scenes";
 import {KeyCallbackMap, keyCallbackFn} from '../eventManagers/keyPressed/models';
@@ -12,7 +12,7 @@ type initOptions = {
 }
 
 class GameObject {
-    private gameInstance: Game;
+    protected gameInstance: Game;
 
     afterRender: RenderEvent;
     beforeDestroy: RenderEvent;
@@ -23,7 +23,9 @@ class GameObject {
     }
 
     position: Vector2D;
-    protected rotationAngle: number;
+    public rotationAngle: number;
+    public velocity: number;
+    
 
     id: string;
 
@@ -34,6 +36,7 @@ class GameObject {
         this.afterDestroy = emptyRenderEvent;
 
         this.rotationAngle = 0;
+        this.velocity = 0;
 
         this._keyCallbackMap = {
             [KeyEvents.KeyDown]: {},
@@ -57,6 +60,10 @@ class GameObject {
         }
     }
 
+    protected getCurrentScene(){
+        return this.gameInstance.sceneManager;
+    }
+
     _render(canvas: Game["canvas"]){
         canvas.push();
         canvas.translate(this.position.x, this.position.y);
@@ -71,6 +78,10 @@ class GameObject {
     beforeRender(canvas: Game["canvas"]){}
     onLeftMouseButtonDown(canvas: Game["canvas"], mousePos: Vector2D, e?: MouseEvent){}
     onLeftMouseButtonHeld(canvas: Game["canvas"], mousePos: Vector2D, e?: MouseEvent){}
+    onLeftMouseButtonUp(canvas: Game["canvas"], mousePos: Vector2D, e?: MouseEvent){}
+    onRightMouseButtonDown(canvas: Game["canvas"], mousePos: Vector2D, e?: MouseEvent){}
+    onRightMouseButtonHeld(canvas: Game["canvas"], mousePos: Vector2D, e?: MouseEvent){}
+    onRightMouseButtonUp(canvas: Game["canvas"], mousePos: Vector2D, e?: MouseEvent){}    
 }
 
 export default GameObject;

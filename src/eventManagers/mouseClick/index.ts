@@ -1,5 +1,5 @@
 import Vector2D from '../../math/vector2d';
-import Game from '../../game';
+import Game from '../../Game';
 import GameObject from '../../gameObject';
 
 export enum PointerEvents {
@@ -34,6 +34,10 @@ export type PointerEventCallbackMap = {
     [key in PointerEvents]?: PointerEventCallback[];
 }
 
+type eventMap = {
+    [key in MouseButtons]: (e: MouseEvent) => any
+}
+
 class PointerEventsManager {
     private game: Game;
     private buttonsHeld: MouseButtons[];
@@ -47,17 +51,32 @@ class PointerEventsManager {
     
         document.getElementById('root')?.addEventListener('mousedown', e => {
             const clickedButton = e.button;
-            if (clickedButton === MouseButtons.LeftButton) {
-                this.handleLeftButtonDown(e);
+
+            const eventMap: eventMap = {
+                [MouseButtons.LeftButton]: this.handleLeftButtonDown.bind(this),
+                [MouseButtons.RightButton]: this.handleRightButtonDown.bind(this),
+                [MouseButtons.Scroll]: (e) => undefined
             }
+
+            return eventMap[clickedButton as MouseButtons]?.(e);
         });
 
         document.getElementById('root')?.addEventListener('mouseup', e => {
             const clickedButton = e.button;
-            if (clickedButton === MouseButtons.LeftButton) {
-                this.handleLeftButtonUp(e);
+
+            const eventMap: eventMap = {
+                [MouseButtons.LeftButton]: this.handleLeftButtonUp.bind(this),
+                [MouseButtons.RightButton]: this.handleRightButtonUp.bind(this),
+                [MouseButtons.Scroll]: (e) => undefined
             }
+
+            return eventMap[clickedButton as MouseButtons]?.(e);
         });
+
+        document.getElementById("root")?.addEventListener("scroll", e => {
+            // I`m wodking without a mouse rn, gonna code that later lmao
+            console.log(e);
+        })
 
         game.addUpdateToQueue(() => {
             this.callbackMap.leftButtonHeld?.forEach(cb => {
@@ -82,9 +101,18 @@ class PointerEventsManager {
         (this.callbackMap[event] as PointerEventCallback[]).push(...callbacks);
     }
 
+    private handleButtonDown(e: MouseEvent, button: MouseButtons){
+        this.buttonsHeld.push(button);
+        return new Vector2D(e.clientX, e.clientY);
+    }
+
+    private handleButtonUp(e: MouseEvent, button: MouseButtons){
+        this.buttonsHeld = this.buttonsHeld.filter(b => b !== button);
+        return new Vector2D(e.clientX, e.clientY);
+    }
+
     private handleLeftButtonDown(e: MouseEvent){
-        this.buttonsHeld.push(MouseButtons.LeftButton);
-        const mousePos = new Vector2D(e.clientX, e.clientY);
+        const mousePos = this.handleButtonDown(e, MouseButtons.LeftButton);
 
         this.callbackMap.leftButtonDown?.forEach(cb => {
             cb(this.game.canvas, mousePos, e);
@@ -92,10 +120,25 @@ class PointerEventsManager {
     }
 
     private handleLeftButtonUp(e: MouseEvent){
-        this.buttonsHeld = this.buttonsHeld.filter(b => b !== MouseButtons.LeftButton);
-        const mousePos = new Vector2D(e.clientX, e.clientY);
+        const mousePos = this.handleButtonUp(e, MouseButtons.LeftButton);
 
         this.callbackMap.leftButtonUp?.forEach(cb => {
+            cb(this.game.canvas, mousePos, e);
+        });
+    }
+    
+    private handleRightButtonDown(e: MouseEvent){
+        const mousePos = this.handleButtonDown(e, MouseButtons.RightButton);
+
+        this.callbackMap.rightButtonDown?.forEach(cb => {
+            cb(this.game.canvas, mousePos, e);
+        });
+    }
+
+    private handleRightButtonUp(e: MouseEvent){
+        const mousePos = this.handleButtonUp(e, MouseButtons.RightButton);
+
+        this.callbackMap.rigthButtonUp?.forEach(cb => {
             cb(this.game.canvas, mousePos, e);
         });
     }
@@ -104,6 +147,10 @@ class PointerEventsManager {
     addCallbackMapFromGameObject(gameObject: GameObject){
         this.upsertEventCallback(PointerEvents.LeftButtonDown, [gameObject.onLeftMouseButtonDown.bind(gameObject)]);
         this.upsertEventCallback(PointerEvents.LeftButtonHeld, [gameObject.onLeftMouseButtonHeld.bind(gameObject)]);
+        this.upsertEventCallback(PointerEvents.LeftButtonUp, [gameObject.onLeftMouseButtonUp.bind(gameObject)]);
+        this.upsertEventCallback(PointerEvents.RightButonDown, [gameObject.onRightMouseButtonDown.bind(gameObject)]);
+        this.upsertEventCallback(PointerEvents.RightButtonHeld, [gameObject.onRightMouseButtonHeld.bind(gameObject)]);
+        this.upsertEventCallback(PointerEvents.RigthButtonUp, [gameObject.onRightMouseButtonUp.bind(gameObject)]);
     }
 
 

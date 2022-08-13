@@ -1,8 +1,9 @@
-import Game from "../../game";
+import Game from "../../Game";
 import GameObject from "../../gameObject";
 import * as Controls from '../../utils/Controls';
 import * as Colors from '../../utils/Colors';
 import Vector2D from "math/vector2d";
+import Bullet from "./Bullet";
 
 class TestGameObject extends GameObject {
     private color: number[];
@@ -51,6 +52,12 @@ class TestGameObject extends GameObject {
 
     onLeftMouseButtonHeld(canvas: Game["canvas"], mousePos: Vector2D){
         this.rotationAngle += 1 / (360 / Math.PI);
+    }
+
+    onRightMouseButtonDown(canvas: Game["canvas"], mousePos: Vector2D, e: MouseEvent) {
+        const myLayer = this.getCurrentScene().getLayersWithGameObject(this)[0];
+        const bullet = new Bullet(this.gameInstance, this.position, 3, 2);
+        myLayer.registerGameObject(bullet.id, bullet);
     }
     
 }

@@ -1,4 +1,5 @@
-import Game from "game";
+import GameObject from "../gameObject";
+import Game from "../Game";
 import Layer from "./Layer";
 
 type ScenesMap = {
@@ -12,6 +13,7 @@ class SceneManager {
 
     constructor(game: Game){
         this.game = game;
+        game.sceneManager = this;
         game.addUpdateToQueue(this.renderScenes.bind(this));
         this.scenesMap = {};
     }
@@ -52,6 +54,12 @@ class SceneManager {
     createScene(sceneName: string){
         if (this.scenesMap[sceneName]) return;
         this.scenesMap[sceneName] = [];
+    }
+
+    getLayersWithGameObject(gameObject: GameObject){
+        return this.currentScene.filter(layer => {
+            return layer.gameObjects[gameObject.id];
+        });
     }
 }
 

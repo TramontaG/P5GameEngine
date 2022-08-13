@@ -1,4 +1,4 @@
-import Game from "../game";
+import Game from "../Game";
 import GameObject from "../gameObject";
 import { RenderEvent, SceneRenderFn } from "../Models/Scenes"
 import { emptyRender, emptyRenderEvent } from "../utils/Scenes";
