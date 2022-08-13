@@ -102,6 +102,11 @@ class GameObject {
         canvas.pop();
     }
 
+    protected delete(){
+        const currentLayer = this.getCurrentScene().getLayersWithGameObject(this)[0];
+        currentLayer.unregisterGameObject(this.id);
+    }
+
     render(canvas: Game["canvas"]){}
     beforeRender(canvas: Game["canvas"]){}
     onLeftMouseButtonDown(canvas: Game["canvas"], mousePos: Vector2D, e?: MouseEvent){}

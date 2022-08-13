@@ -9,7 +9,10 @@ class Bullet extends GameObject {
         this.position = pos;
         this.velocity = vel;
         this.rotationAngle = angle;
-        console.log(this._update);
+        
+        setTimeout(() => {
+            this.delete();
+        }, 1000)
     }
 
     render(canvas: import("p5")): void {
