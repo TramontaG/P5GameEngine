@@ -31,12 +31,20 @@ class Vector2D {
         return this.add(vector.inverse());
     }
 
+    divide(n: number){
+        return new Vector2D(this.x / n, this.y / n);
+    }
+
     multiply(n: number){
         return new Vector2D(this.x * n, this.y * n);
     }
 
     dotProduct(vector: Vector2D){
         return this.x * vector.y + this.y * vector.x;
+    }
+
+    toUnitary(){
+        return this.divide(this.modulus());
     }
 }
 

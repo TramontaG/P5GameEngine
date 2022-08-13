@@ -23,8 +23,9 @@ class GameObject {
     }
 
     position: Vector2D;
-    public rotationAngle: number;
-    public velocity: number;
+    private _velocity;
+    private _rotationAngle: Vector2D;
+    private _velocityVector: Vector2D;
     
 
     id: string;
@@ -35,8 +36,9 @@ class GameObject {
         this.beforeDestroy = emptyRenderEvent;
         this.afterDestroy = emptyRenderEvent;
 
-        this.rotationAngle = 0;
-        this.velocity = 0;
+        this._rotationAngle = new Vector2D(0, -1);
+        this._velocity = 0;
+        this._velocityVector = new Vector2D(0, 0);
 
         this._keyCallbackMap = {
             [KeyEvents.KeyDown]: {},
@@ -60,9 +62,36 @@ class GameObject {
         }
     }
 
+    set rotationAngle(angleInRadians: number){
+        const x = Math.cos(angleInRadians);
+        const y = Math.sin(angleInRadians);
+        this._rotationAngle = new Vector2D(x, y);
+        this._velocityVector = this._rotationAngle.toUnitary().multiply(this._velocity);
+
+    }
+    get rotationAngle(){
+        const {x, y} = this._rotationAngle;
+        return Math.atan2(y, x);
+    }
+
+    set velocity(v: number){
+        this._velocity = v;
+        this._velocityVector = this._rotationAngle.toUnitary().multiply(v);
+    }
+    get velocity() {
+        return this._velocity;
+    }
+
+
     protected getCurrentScene(){
         return this.gameInstance.sceneManager;
     }
+
+    _update(){
+        this.position = this.position.add(this._velocityVector);
+        this.update();
+    }
+    update(){}
 
     _render(canvas: Game["canvas"]){
         canvas.push();
@@ -70,7 +99,6 @@ class GameObject {
         canvas.rotate(this.rotationAngle);
 
         this.render(canvas);
-
         canvas.pop();
     }
 
