@@ -7,15 +7,16 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "dev": "rm -r ./.parcel-cache && concurrently \"tsc --watch\" \"parcel index.html\"",
+    "dev": "rm -r ./.parcel-cache || concurrently \"tsc --watch\" \"parcel index.html\"",
     "lines": "Linecounter count --path=\"./src\""
   },
-
   "dependencies": {
     "p5": "^1.4.2"
   },
   "devDependencies": {
     "@types/p5": "^1.4.2",
-    "concurrently": "^7.3.0"
+    "concurrently": "^7.3.0",
+    "parcel": "^2.7.0",
+    "typescript": "^4.7.4"
   }
 }
