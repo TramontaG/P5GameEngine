@@ -1,9 +1,10 @@
 import SceneManager from '../Scenes/SceneManager';
-import Game from '../game';
+import Game from '../Game';
 import Layer from '../Scenes/Layer';
 import KeyPressedEventManager from '../eventManagers/keyPressed';
 import TestGameObject from './testGameObject';
 import PointerEventsManager from '../eventManagers/mouseClick';
+import Wall from './testGameObject/Wall';
 
 const game = new Game({
     height: 250,
@@ -12,6 +13,7 @@ const game = new Game({
 const sceneManager = new SceneManager(game);
 const keyPressedEventManager = new KeyPressedEventManager(game);
 const pointerEventsManager = new PointerEventsManager(game);
+const wall = new Wall(game);
 
 game.gameReady.then(() => {
     const myGameObject = new TestGameObject(game);
@@ -24,7 +26,7 @@ game.gameReady.then(() => {
         beforeRender: (canvas) => {
             canvas.background(255, 0, 0);
         },
-        gameObjects: [myGameObject],
+        gameObjects: [myGameObject, wall],
     }));
 
     sceneManager.setScene("scene1");

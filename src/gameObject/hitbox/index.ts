@@ -49,9 +49,6 @@ class Hitbox {
 
     }
 
-    collidesWith(other: Hitbox){
-
-    }
 }
 
 export default Hitbox;

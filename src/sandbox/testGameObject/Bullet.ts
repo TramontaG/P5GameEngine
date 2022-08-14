@@ -1,6 +1,7 @@
 import Vector2D from "math/vector2d";
 import Game from "../../Game";
 import GameObject from "../../gameObject";
+import Wall from "./Wall";
 
 class Bullet extends GameObject {
 
@@ -20,6 +21,14 @@ class Bullet extends GameObject {
         canvas.noStroke();
         canvas.circle(0, 0, 3);
     }
+
+    handleCollision(other: GameObject){
+        if (other.is(Wall)){
+            this.delete();
+            console.log("Bullet collided with wall");
+        }
+    }
+
 }
 
 export default Bullet;
