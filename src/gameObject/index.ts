@@ -4,6 +4,8 @@ import { RenderEvent, SceneRenderFn } from "../Models/Scenes";
 import { emptyRender, emptyRenderEvent } from "../utils/Scenes";
 import {KeyCallbackMap, keyCallbackFn} from '../eventManagers/keyPressed/models';
 import { KeyEvents } from "../eventManagers/keyPressed";
+import Hitbox from "./hitbox";
+
 
 type initOptions = {
     keyCallbackMap?: {
@@ -14,9 +16,7 @@ type initOptions = {
 class GameObject {
     protected gameInstance: Game;
 
-    afterRender: RenderEvent;
-    beforeDestroy: RenderEvent;
-    afterDestroy: RenderEvent;
+    hitboxes: Hitbox[];
     
     public _keyCallbackMap: {
         [key in KeyEvents]: KeyCallbackMap
@@ -32,13 +32,11 @@ class GameObject {
 
     constructor(gameInstance: Game, options?: initOptions){
         this.gameInstance = gameInstance;
-        this.afterRender = emptyRenderEvent;
-        this.beforeDestroy = emptyRenderEvent;
-        this.afterDestroy = emptyRenderEvent;
 
         this._rotationAngle = new Vector2D(0, -1);
         this._velocity = 0;
         this._velocityVector = new Vector2D(0, 0);
+        this.position = new Vector2D(0,0);
 
         this._keyCallbackMap = {
             [KeyEvents.KeyDown]: {},
@@ -49,8 +47,7 @@ class GameObject {
 
         this.id = Math.round(Math.random() * 0xFFFFFFFF).toString(16);
 
-        this.position = new Vector2D(0,0);
-        
+        this.hitboxes = [];
     }
 
     set keyCallbackMap(map: {

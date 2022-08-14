@@ -5,6 +5,7 @@ import * as Colors from '../../utils/Colors';
 import Vector2D from "math/vector2d";
 import Bullet from "./Bullet";
 import { vectorToRadians } from "../../math/angles";
+import Hitbox, { HitboxType } from "../../gameObject/hitbox";
 
 class TestGameObject extends GameObject {
     private color: number[];
@@ -26,6 +27,13 @@ class TestGameObject extends GameObject {
                 [" "]: this.changeColor.bind(this),
             }
         }
+
+        this.hitboxes.push(new Hitbox(this, HitboxType.square, {
+            xSize: 10,
+            ySize: 10,
+            debug: true,
+        }))
+
     }
 
     changeColor(){
@@ -44,6 +52,7 @@ class TestGameObject extends GameObject {
     render(canvas: Game["canvas"]){
         canvas.fill(this.color);
         canvas.square(0, 0, this.size);
+        this.hitboxes.forEach(hb => hb.render(canvas));
     }
 
     beforeRender(canvas: Game["canvas"]){
