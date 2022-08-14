@@ -15,7 +15,6 @@ class TestGameObject extends GameObject {
 
         this.color = [255,255,255];
         this.size = 10;
-        this.rotationAngle = 0;
         
         this.keyCallbackMap = {
             keyHeld: {

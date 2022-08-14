@@ -17,7 +17,8 @@ class Bullet extends GameObject {
 
     render(canvas: import("p5")): void {
         canvas.fill(0,0,255);
-        canvas.circle(0, 0, 1);
+        canvas.noStroke();
+        canvas.circle(0, 0, 3);
     }
 }
 

@@ -16,6 +16,7 @@
   "devDependencies": {
     "@types/p5": "^1.4.2",
     "concurrently": "^7.3.0",
+    "linecounter": "^3.3.1",
     "parcel": "^2.7.0",
     "typescript": "^4.7.4"
   }
