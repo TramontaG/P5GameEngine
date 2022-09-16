@@ -5,6 +5,7 @@ import { KeyEvents } from "../eventManagers/keyPressed";
 import Hitbox from "./hitbox";
 import { checkCollisionBetween } from "../physics/collision";
 import { Class } from "../utils/Models";
+import { resultingForce } from "../physics/forces";
 
 
 type initOptions = {
@@ -17,6 +18,9 @@ class GameObject {
     protected gameInstance: Game;
 
     hitboxes: Hitbox[];
+    forces: {
+        [key: string]: Vector2D;
+    }
     
     public _keyCallbackMap: {
         [key in KeyEvents]: KeyCallbackMap
@@ -48,6 +52,7 @@ class GameObject {
         this.id = Math.round(Math.random() * 0xFFFFFFFF).toString(16);
 
         this.hitboxes = [];
+        this.forces = {};
     }
 
     set keyCallbackMap(map: {
@@ -78,7 +83,20 @@ class GameObject {
     get velocity() {
         return this._velocity;
     }
+    get velocityAsVector(){
+        return this._velocityVector;
+    }
+    set velocityAsVector(v: Vector2D){
+        this._velocityVector = v;
+    }
 
+    public upsertForce(key: string, force: Vector2D){
+        this.forces[key] = force;
+    }
+
+    protected setGravity(mag: number){
+        this.upsertForce("__GRAVITY__", new Vector2D(0,1).setMag(mag / 10));
+    }
 
     protected getCurrentScene(){
         return this.gameInstance.sceneManager;
@@ -102,10 +120,11 @@ class GameObject {
     }
 
     _update(){
-        this.position = this.position.add(this._velocityVector);
-        this.update();
         this.checkCollision();
+        this.update();
         this.checkOutOfScreen();
+        this.position = this.position.add(this._velocityVector);
+        this.velocityAsVector = this.velocityAsVector.add(resultingForce(Object.values(this.forces)));
     }
 
     private checkCollision(){

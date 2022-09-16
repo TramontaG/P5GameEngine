@@ -12,11 +12,18 @@ class Vector2D {
     }
 
     inverse(){
-        return new Vector2D(this.x * -1, this.y * -1);
+        return this.multiply(-1);
     }
 
     modulus(){
         return Math.sqrt(this.x * this.x + this.y * this.y);
+    }
+
+    setMag(mag: number){
+        return new Vector2D(
+            this.x * (mag / this.modulus()),
+            this.y * (mag / this.modulus())
+        )
     }
 
     angleWith(otherVector: Vector2D){
