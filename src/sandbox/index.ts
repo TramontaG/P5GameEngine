@@ -10,6 +10,7 @@ const game = new Game({
     height: 250,
     width: 250,
 });
+
 const sceneManager = new SceneManager(game);
 const keyPressedEventManager = new KeyPressedEventManager(game);
 const pointerEventsManager = new PointerEventsManager(game);

@@ -1,8 +1,6 @@
 import Vector2D from "../math/vector2d";
 import Game from "../Game";
-import { RenderEvent, SceneRenderFn } from "../Models/Scenes";
-import { emptyRender, emptyRenderEvent } from "../utils/Scenes";
-import {KeyCallbackMap, keyCallbackFn} from '../eventManagers/keyPressed/models';
+import { KeyCallbackMap } from '../eventManagers/keyPressed/models';
 import { KeyEvents } from "../eventManagers/keyPressed";
 import Hitbox from "./hitbox";
 import { checkCollisionBetween } from "../physics/collision";
@@ -106,18 +104,40 @@ class GameObject {
     _update(){
         this.position = this.position.add(this._velocityVector);
         this.update();
+        this.checkCollision();
+        this.checkOutOfScreen();
+    }
+
+    private checkCollision(){
+        const activatedCbs: (() => void)[] = [];
 
         this.forEveryHitbox(hb1 => {
             this.otherGameObjects.forEach(go => {
                 go.forEveryHitbox(hb2 => {
                     const collides = checkCollisionBetween(hb1, hb2);
                     if (collides)
-                        this.handleCollision(hb2.belongsTo);
+                        activatedCbs.push(() => this.handleCollision(hb2.belongsTo));
                 }); 
             });
         });
+
+        activatedCbs.forEach(cb => cb());
     }
     update(){}
+
+    private checkOutOfScreen(){
+        const gameScreen = new Vector2D(
+            this.gameInstance.canvas.width,
+            this.gameInstance.canvas.height,
+        );
+        
+        if (this.position.x > gameScreen.x ||
+            this.position.y > gameScreen.y ||
+            this.position.x < 0 ||
+            this.position.y < 0){
+                this.handleExitScreen()
+        }
+    }
 
     _render(canvas: Game["canvas"]){
         canvas.push();
@@ -140,6 +160,7 @@ class GameObject {
     beforeRender(canvas: Game["canvas"]){}
     
     handleCollision(other: GameObject){}
+    handleExitScreen(){}
     
     onLeftMouseButtonDown(canvas: Game["canvas"], mousePos: Vector2D, e?: MouseEvent){}
     onLeftMouseButtonHeld(canvas: Game["canvas"], mousePos: Vector2D, e?: MouseEvent){}

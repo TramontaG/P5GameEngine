@@ -16,11 +16,7 @@ class Bullet extends GameObject {
             xSize: 10,
             ySize: 10,
             debug: true,
-        }))
-        
-        setTimeout(() => {
-            this.delete();
-        }, 1000)
+        }));
     }
 
     render(canvas: import("p5")): void {
@@ -34,6 +30,11 @@ class Bullet extends GameObject {
             this.delete();
             console.log("Bullet collided with wall");
         }
+    }
+
+    handleExitScreen(){
+        console.log("DELETING");
+        this.delete();
     }
 
 }
