@@ -1,6 +1,7 @@
 import GameObject from '../gameObject';
 import p5 from 'p5';
 import SceneManager from '../Scenes/SceneManager';
+import * as Logger from "../utils/Debugger";
 
 type GameOptions = {
     width: number;
@@ -62,6 +63,7 @@ class Game {
     }
 
     private updateFn() {
+        Logger.update();
         this.updateQueue.forEach(update => update());
     }
 

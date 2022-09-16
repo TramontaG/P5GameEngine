@@ -6,6 +6,7 @@ import Vector2D from "math/vector2d";
 import Bullet from "./Bullet";
 import { vectorToRadians } from "../../math/angles";
 import Hitbox, { HitboxType } from "../../gameObject/hitbox";
+import * as Logger from "../../utils/Debugger";
 
 class TestGameObject extends GameObject {
     private color: number[];
@@ -32,8 +33,7 @@ class TestGameObject extends GameObject {
             xSize: 10,
             ySize: 10,
             debug: true,
-        }))
-
+        }));
     }
 
     changeColor(){
@@ -53,6 +53,7 @@ class TestGameObject extends GameObject {
         canvas.fill(this.color);
         canvas.square(0, 0, this.size);
         this.hitboxes.forEach(hb => hb.render(canvas));
+        Logger.watch("boxPosition", this.position);
     }
 
     beforeRender(canvas: Game["canvas"]){

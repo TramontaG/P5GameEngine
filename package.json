@@ -11,6 +11,7 @@
     "lines": "Linecounter count --path=\"./src\""
   },
   "dependencies": {
+    "@box2d/core": "^0.9.0",
     "p5": "^1.4.2"
   },
   "devDependencies": {

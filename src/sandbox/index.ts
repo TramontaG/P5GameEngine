@@ -24,7 +24,7 @@ game.gameReady.then(() => {
 
     sceneManager.pushLayerToScene("scene1", new Layer({
         beforeRender: (canvas) => {
-            canvas.background(255, 0, 0);
+            canvas.background(0, 0, 0);
         },
         gameObjects: [myGameObject, wall],
     }));

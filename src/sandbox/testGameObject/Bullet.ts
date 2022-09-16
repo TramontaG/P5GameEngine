@@ -1,3 +1,4 @@
+import Hitbox, { HitboxType } from "../../gameObject/hitbox";
 import Vector2D from "math/vector2d";
 import Game from "../../Game";
 import GameObject from "../../gameObject";
@@ -10,6 +11,12 @@ class Bullet extends GameObject {
         this.position = pos;
         this.velocity = vel;
         this.rotationAngle = angle;
+
+        this.hitboxes.push(new Hitbox(this, HitboxType.square, {
+            xSize: 10,
+            ySize: 10,
+            debug: true,
+        }))
         
         setTimeout(() => {
             this.delete();

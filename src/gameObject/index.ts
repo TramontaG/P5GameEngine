@@ -125,11 +125,13 @@ class GameObject {
         canvas.rotate(this.rotationAngle);
 
         this.render(canvas);
+        this.hitboxes.forEach(hb => hb.render(canvas));
         canvas.pop();
     }
 
     protected delete(){
-        this.myLayer.unregisterGameObject(this.id);
+        if (this.myLayer.gameObjects[this.id])
+            this.myLayer.unregisterGameObject(this.id);
     }
 
     
