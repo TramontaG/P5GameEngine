@@ -25,12 +25,15 @@ class GameObject {
 		[key in KeyEvents]: KeyCallbackMap;
 	};
 
-	position: Vector2D;
+	public position: Vector2D;
 	private _velocity;
 	private _rotationAngle: Vector2D;
 	private _velocityVector: Vector2D;
 	private _bouncynessCoeficient: number;
 	protected disableMovement: boolean;
+	public imovable: boolean;
+	public beingDragged: boolean;
+	public solid: boolean;
 
 	id: string;
 
@@ -55,6 +58,9 @@ class GameObject {
 		this.forces = {};
 		this._bouncynessCoeficient = 1;
 		this.disableMovement = false;
+		this.imovable = false;
+		this.beingDragged = false;
+		this.solid = false;
 	}
 
 	set keyCallbackMap(map: {
@@ -155,9 +161,11 @@ class GameObject {
 
 	bounce(sides: CollisionSides, bouncynessCoeficient = this._bouncynessCoeficient) {
 		if (sides.down) {
+			const newVerticalVelocity = this.velocityAsVector.y * bouncynessCoeficient * -1;
+
 			this.velocityAsVector = new Vector2D(
 				this.velocityAsVector.x,
-				this.velocityAsVector.y * bouncynessCoeficient * -1
+				Math.abs(newVerticalVelocity) < 0.5 ? 0 : newVerticalVelocity
 			);
 			return true;
 		}
@@ -218,14 +226,16 @@ class GameObject {
 	onRightMouseButtonUp(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {}
 
 	_onLeftDragMe(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {
-		if (this.isMouseOnMe(mousePos)) {
+		if (this.isMouseOnMe(mousePos) || this.beingDragged) {
+			this.beingDragged = true;
 			this.onLeftDragMe(canvas, mousePos, e);
 		}
 	}
 	onLeftDragMe(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {}
 
 	_onRightDragMe(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {
-		if (this.isMouseOnMe(mousePos)) {
+		if (this.isMouseOnMe(mousePos) || this.beingDragged) {
+			this.beingDragged = true;
 			this.onRightDragMe(canvas, mousePos, e);
 		}
 	}

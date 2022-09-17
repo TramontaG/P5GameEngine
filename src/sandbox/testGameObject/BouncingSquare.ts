@@ -15,6 +15,7 @@ class BouncingSquare extends GameObject {
 		this.position = new Vector2D(80, 40);
 		this.width = 10;
 		this.height = 10;
+		this.solid = true;
 
 		this.hitboxes.push(
 			new Hitbox(this, HitboxType.square, {
@@ -25,11 +26,12 @@ class BouncingSquare extends GameObject {
 		);
 
 		this.setGravity(1);
+		console.log(this);
 	}
 
 	handleCollision(other: GameObject, sides: CollisionSides) {
 		if (other.is(Wall)) {
-			return this.bounce(sides, 0.9);
+			return this.bounce(sides, 0.8);
 		}
 		return false;
 	}
@@ -41,6 +43,7 @@ class BouncingSquare extends GameObject {
 
 	onLeftMouseButtonUp() {
 		this.velocityAsVector = new Vector2D(0, 0);
+		this.beingDragged = false;
 	}
 
 	render(canvas: Game['canvas']) {
