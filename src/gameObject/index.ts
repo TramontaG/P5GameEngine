@@ -1,192 +1,202 @@
-import Vector2D from "../math/vector2d";
-import Game from "../Game";
+import Vector2D from '../math/vector2d';
+import Game from '../game';
 import { KeyCallbackMap } from '../eventManagers/keyPressed/models';
-import { KeyEvents } from "../eventManagers/keyPressed";
-import Hitbox from "./hitbox";
-import { checkCollisionBetween } from "../physics/collision";
-import { Class } from "../utils/Models";
-import { resultingForce } from "../physics/forces";
-
+import { KeyEvents } from '../eventManagers/keyPressed';
+import Hitbox from './hitbox';
+import { checkCollisionBetween, CollisionSides } from '../physics/collision';
+import { Class } from '../utils/Models';
+import { resultingForce } from '../physics/forces';
 
 type initOptions = {
-    keyCallbackMap?: {
-        [key in KeyEvents]?: KeyCallbackMap
-    }
-}
+	keyCallbackMap?: {
+		[key in KeyEvents]?: KeyCallbackMap;
+	};
+};
 
 class GameObject {
-    protected gameInstance: Game;
+	protected gameInstance: Game;
 
-    hitboxes: Hitbox[];
-    forces: {
-        [key: string]: Vector2D;
-    }
-    
-    public _keyCallbackMap: {
-        [key in KeyEvents]: KeyCallbackMap
-    }
+	hitboxes: Hitbox[];
+	forces: {
+		[key: string]: Vector2D;
+	};
 
-    position: Vector2D;
-    private _velocity;
-    private _rotationAngle: Vector2D;
-    private _velocityVector: Vector2D;
-    
+	public _keyCallbackMap: {
+		[key in KeyEvents]: KeyCallbackMap;
+	};
 
-    id: string;
+	position: Vector2D;
+	private _velocity;
+	private _rotationAngle: Vector2D;
+	private _velocityVector: Vector2D;
+	private _bouncynessCoeficient: number;
 
-    constructor(gameInstance: Game, options?: initOptions){
-        this.gameInstance = gameInstance;
+	id: string;
 
-        this._rotationAngle = new Vector2D(0, -1);
-        this._velocity = 0;
-        this._velocityVector = new Vector2D(0, 0);
-        this.position = new Vector2D(0,0);
+	constructor(gameInstance: Game, options?: initOptions) {
+		this.gameInstance = gameInstance;
 
-        this._keyCallbackMap = {
-            [KeyEvents.KeyDown]: {},
-            [KeyEvents.KeyHeld]: {},
-            [KeyEvents.KeyUp]: {},
-            ...options?.keyCallbackMap,
-        };
+		this._rotationAngle = new Vector2D(0, -1);
+		this._velocity = 0;
+		this._velocityVector = new Vector2D(0, 0);
+		this.position = new Vector2D(0, 0);
 
-        this.id = Math.round(Math.random() * 0xFFFFFFFF).toString(16);
+		this._keyCallbackMap = {
+			[KeyEvents.KeyDown]: {},
+			[KeyEvents.KeyHeld]: {},
+			[KeyEvents.KeyUp]: {},
+			...options?.keyCallbackMap
+		};
 
-        this.hitboxes = [];
-        this.forces = {};
-    }
+		this.id = Math.round(Math.random() * 0xffffffff).toString(16);
 
-    set keyCallbackMap(map: {
-        [key in KeyEvents]?: KeyCallbackMap
-    }){
-        this._keyCallbackMap = {
-            ...this._keyCallbackMap,
-            ...map,
-        }
-    }
+		this.hitboxes = [];
+		this.forces = {};
+		this._bouncynessCoeficient = 1;
+	}
 
-    set rotationAngle(angleInRadians: number){
-        const x = Math.cos(angleInRadians);
-        const y = Math.sin(angleInRadians);
-        this._rotationAngle = new Vector2D(x, y);
-        this._velocityVector = this._rotationAngle.toUnitary().multiply(this._velocity);
+	set keyCallbackMap(map: {
+		[key in KeyEvents]?: KeyCallbackMap;
+	}) {
+		this._keyCallbackMap = {
+			...this._keyCallbackMap,
+			...map
+		};
+	}
 
-    }
-    get rotationAngle(){
-        const {x, y} = this._rotationAngle;
-        return Math.atan2(y, x);
-    }
+	set rotationAngle(angleInRadians: number) {
+		const x = Math.cos(angleInRadians);
+		const y = Math.sin(angleInRadians);
+		this._rotationAngle = new Vector2D(x, y);
+		this._velocityVector = this._rotationAngle.toUnitary().multiply(this._velocity);
+	}
+	get rotationAngle() {
+		const { x, y } = this._rotationAngle;
+		return Math.atan2(y, x);
+	}
 
-    set velocity(v: number){
-        this._velocity = v;
-        this._velocityVector = this._rotationAngle.toUnitary().multiply(v);
-    }
-    get velocity() {
-        return this._velocity;
-    }
-    get velocityAsVector(){
-        return this._velocityVector;
-    }
-    set velocityAsVector(v: Vector2D){
-        this._velocityVector = v;
-    }
+	set velocity(v: number) {
+		this._velocity = v;
+		this._velocityVector = this._rotationAngle.toUnitary().multiply(v);
+	}
+	get velocity() {
+		return this._velocity;
+	}
+	get velocityAsVector() {
+		return this._velocityVector;
+	}
+	set velocityAsVector(v: Vector2D) {
+		this._velocityVector = v;
+	}
 
-    public upsertForce(key: string, force: Vector2D){
-        this.forces[key] = force;
-    }
+	public upsertForce(key: string, force: Vector2D) {
+		this.forces[key] = force;
+	}
 
-    protected setGravity(mag: number){
-        this.upsertForce("__GRAVITY__", new Vector2D(0,1).setMag(mag / 10));
-    }
+	protected setGravity(mag: number) {
+		this.upsertForce('__GRAVITY__', new Vector2D(0, 1).setMag(mag / 10));
+	}
 
-    protected getCurrentScene(){
-        return this.gameInstance.sceneManager;
-    }
-    get myLayer() {
-        return this.getCurrentScene().getLayersWithGameObject(this)[0];
-    }
-    
-    protected get otherGameObjects() {
-        const allGameObjects = {...this.myLayer.gameObjects};
-        delete allGameObjects[this.id];
-        return Object.values(allGameObjects);
-    }
+	protected getCurrentScene() {
+		return this.gameInstance.sceneManager;
+	}
+	get myLayer() {
+		return this.getCurrentScene().getLayersWithGameObject(this)[0];
+	}
 
-    protected forEveryHitbox(cb: (hb: Hitbox) => any){
-        this.hitboxes.forEach(cb);
-    }
+	protected get otherGameObjects() {
+		const allGameObjects = { ...this.myLayer.gameObjects };
+		delete allGameObjects[this.id];
+		return Object.values(allGameObjects);
+	}
 
-    public is(gameObjectType: Class){
-        return this instanceof gameObjectType
-    }
+	protected forEveryHitbox(cb: (hb: Hitbox) => any) {
+		this.hitboxes.forEach(cb);
+	}
 
-    _update(){
-        this.checkCollision();
-        this.update();
-        this.checkOutOfScreen();
-        this.position = this.position.add(this._velocityVector);
-        this.velocityAsVector = this.velocityAsVector.add(resultingForce(Object.values(this.forces)));
-    }
+	public is(gameObjectType: Class) {
+		return this instanceof gameObjectType;
+	}
 
-    private checkCollision(){
-        const activatedCbs: (() => void)[] = [];
+	_update() {
+		this.position = this.position.add(this._velocityVector);
+		const shouldStopMovement = this.checkCollision();
+		if (!shouldStopMovement)
+			this.velocityAsVector = this.velocityAsVector.add(resultingForce(Object.values(this.forces)));
+		this.update();
+		this.checkOutOfScreen();
+	}
 
-        this.forEveryHitbox(hb1 => {
-            this.otherGameObjects.forEach(go => {
-                go.forEveryHitbox(hb2 => {
-                    const collides = checkCollisionBetween(hb1, hb2);
-                    if (collides)
-                        activatedCbs.push(() => this.handleCollision(hb2.belongsTo));
-                }); 
-            });
-        });
+	private checkCollision() {
+		const activatedCbs: (() => boolean)[] = [];
 
-        activatedCbs.forEach(cb => cb());
-    }
-    update(){}
+		this.forEveryHitbox((hb1) => {
+			this.otherGameObjects.forEach((go) => {
+				go.forEveryHitbox((hb2) => {
+					const collides = checkCollisionBetween(hb1, hb2);
+					if (collides) activatedCbs.push(() => this.handleCollision(hb2.belongsTo, collides));
+				});
+			});
+		});
 
-    private checkOutOfScreen(){
-        const gameScreen = new Vector2D(
-            this.gameInstance.canvas.width,
-            this.gameInstance.canvas.height,
-        );
-        
-        if (this.position.x > gameScreen.x ||
-            this.position.y > gameScreen.y ||
-            this.position.x < 0 ||
-            this.position.y < 0){
-                this.handleExitScreen()
-        }
-    }
+		return activatedCbs.reduce((shouldStopMovement, cb) => {
+			return shouldStopMovement || cb();
+		}, false);
+	}
+	update() {}
 
-    _render(canvas: Game["canvas"]){
-        canvas.push();
-        canvas.translate(this.position.x, this.position.y);
-        canvas.rotate(this.rotationAngle);
+	bounce(sides: CollisionSides, bouncynessCoeficient = this._bouncynessCoeficient) {
+		if (sides.down) {
+			this.velocityAsVector = new Vector2D(
+				this.velocityAsVector.x,
+				this.velocityAsVector.y * bouncynessCoeficient * -1
+			);
+			return true;
+		}
+		return false;
+	}
 
-        this.render(canvas);
-        this.hitboxes.forEach(hb => hb.render(canvas));
-        canvas.pop();
-    }
+	private checkOutOfScreen() {
+		const gameScreen = new Vector2D(this.gameInstance.canvas.width, this.gameInstance.canvas.height);
 
-    protected delete(){
-        if (this.myLayer.gameObjects[this.id])
-            this.myLayer.unregisterGameObject(this.id);
-    }
+		if (
+			this.position.x > gameScreen.x ||
+			this.position.y > gameScreen.y ||
+			this.position.x < 0 ||
+			this.position.y < 0
+		) {
+			this.handleExitScreen();
+		}
+	}
 
-    
+	_render(canvas: Game['canvas']) {
+		canvas.push();
+		canvas.translate(this.position.x, this.position.y);
+		canvas.rotate(this.rotationAngle);
 
-    render(canvas: Game["canvas"]){}
-    beforeRender(canvas: Game["canvas"]){}
-    
-    handleCollision(other: GameObject){}
-    handleExitScreen(){}
-    
-    onLeftMouseButtonDown(canvas: Game["canvas"], mousePos: Vector2D, e?: MouseEvent){}
-    onLeftMouseButtonHeld(canvas: Game["canvas"], mousePos: Vector2D, e?: MouseEvent){}
-    onLeftMouseButtonUp(canvas: Game["canvas"], mousePos: Vector2D, e?: MouseEvent){}
-    onRightMouseButtonDown(canvas: Game["canvas"], mousePos: Vector2D, e?: MouseEvent){}
-    onRightMouseButtonHeld(canvas: Game["canvas"], mousePos: Vector2D, e?: MouseEvent){}
-    onRightMouseButtonUp(canvas: Game["canvas"], mousePos: Vector2D, e?: MouseEvent){}    
+		this.render(canvas);
+		this.hitboxes.forEach((hb) => hb.render(canvas));
+		canvas.pop();
+	}
+
+	protected delete() {
+		if (this.myLayer.gameObjects[this.id]) this.myLayer.unregisterGameObject(this.id);
+	}
+
+	render(canvas: Game['canvas']) {}
+	beforeRender(canvas: Game['canvas']) {}
+
+	handleCollision(other: GameObject, sides: CollisionSides) {
+		return false;
+	}
+	handleExitScreen() {}
+
+	onLeftMouseButtonDown(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {}
+	onLeftMouseButtonHeld(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {}
+	onLeftMouseButtonUp(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {}
+	onRightMouseButtonDown(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {}
+	onRightMouseButtonHeld(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {}
+	onRightMouseButtonUp(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {}
 }
 
 export default GameObject;
