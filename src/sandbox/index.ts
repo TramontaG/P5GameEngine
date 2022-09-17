@@ -17,14 +17,11 @@ const keyPressedEventManager = new KeyPressedEventManager(game);
 const pointerEventsManager = new PointerEventsManager(game);
 const wall = new Wall(game);
 const bouncingSquare = new BouncingSquare(game);
+const myGameObject = new TestGameObject(game);
 
 game.gameReady.then(() => {
-	const myGameObject = new TestGameObject(game);
-	keyPressedEventManager.addCallbackMapFromGameObject(myGameObject);
-	pointerEventsManager.addCallbackMapFromGameObject(myGameObject);
-	pointerEventsManager.addCallbackMapFromGameObject(bouncingSquare);
-
 	sceneManager.createScene('scene1');
+	sceneManager.setScene('scene1');
 
 	sceneManager.pushLayerToScene(
 		'scene1',
@@ -36,7 +33,9 @@ game.gameReady.then(() => {
 		})
 	);
 
-	sceneManager.setScene('scene1');
+	keyPressedEventManager.addCallbackMapFromCurrentScene();
+	pointerEventsManager.addCallbackMapFromGameObject(myGameObject);
+	pointerEventsManager.addCallbackMapFromGameObject(bouncingSquare);
 });
 
 export default game;

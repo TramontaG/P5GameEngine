@@ -146,12 +146,12 @@ class PointerEventsManager {
 		this.upsertEventCallback(PointerEvents.LeftButtonDown, [gameObject.onLeftMouseButtonDown.bind(gameObject)]);
 		this.upsertEventCallback(PointerEvents.LeftButtonHeld, [gameObject.onLeftMouseButtonHeld.bind(gameObject)]);
 		this.upsertEventCallback(PointerEvents.LeftButtonHeld, [gameObject._onLeftDragMe.bind(gameObject)]);
-		this.upsertEventCallback(PointerEvents.LeftButtonUp, [gameObject.onLeftMouseButtonUp.bind(gameObject)]);
+		this.upsertEventCallback(PointerEvents.LeftButtonUp, [gameObject._onLeftMouseButtonUp.bind(gameObject)]);
 
 		this.upsertEventCallback(PointerEvents.RightButonDown, [gameObject.onRightMouseButtonDown.bind(gameObject)]);
 		this.upsertEventCallback(PointerEvents.RightButtonHeld, [gameObject.onRightMouseButtonHeld.bind(gameObject)]);
 		this.upsertEventCallback(PointerEvents.RightButtonHeld, [gameObject._onRightDragMe.bind(gameObject)]);
-		this.upsertEventCallback(PointerEvents.RigthButtonUp, [gameObject.onRightMouseButtonUp.bind(gameObject)]);
+		this.upsertEventCallback(PointerEvents.RigthButtonUp, [gameObject._onRightMouseButtonUp.bind(gameObject)]);
 	}
 }
 

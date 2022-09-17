@@ -1,115 +1,116 @@
+import SceneManager from '../../Scenes/SceneManager';
 import Game from '../../game';
 import GameObject from '../../gameObject';
-import {KeyCallbackMap, keyCallbackFn, AllKeyEventsCallbackMap} from './models';
+import { KeyCallbackMap, keyCallbackFn, AllKeyEventsCallbackMap } from './models';
 
 export enum KeyEvents {
-    KeyDown = "keyDown",
-    KeyUp = "keyUp",
-    KeyHeld = "keyHeld",
+	KeyDown = 'keyDown',
+	KeyUp = 'keyUp',
+	KeyHeld = 'keyHeld'
 }
 
 class KeyPressedEventManager {
-    private game: Game;
+	private game: Game;
 
-    onKeyDownCallbacks: AllKeyEventsCallbackMap
-    onKeyUpCallbacks: AllKeyEventsCallbackMap;
-    onKeyHeldCallbacks: AllKeyEventsCallbackMap;
+	private onKeyDownCallbacks: AllKeyEventsCallbackMap;
+	private onKeyUpCallbacks: AllKeyEventsCallbackMap;
+	private onKeyHeldCallbacks: AllKeyEventsCallbackMap;
 
-    keysHeld: string[];
+	public keysHeld: string[];
 
-    constructor(game: Game){
-        this.game = game;
+	constructor(game: Game) {
+		this.game = game;
 
-        this.onKeyDownCallbacks = {}
-        this.onKeyUpCallbacks = {};
-        this.onKeyHeldCallbacks = {};
+		this.onKeyDownCallbacks = {};
+		this.onKeyUpCallbacks = {};
+		this.onKeyHeldCallbacks = {};
 
-        this.keysHeld = [];
+		this.keysHeld = [];
 
-        game.canvas.keyPressed = this.keyPressedUpdateFn.bind(this);
-        game.canvas.keyReleased = this.keyReleasedUpdateFN.bind(this);
-        game.addUpdateToQueue(this.keyHeldUpdateFn.bind(this));
-    }
+		game.canvas.keyPressed = this.keyPressedUpdateFn.bind(this);
+		game.canvas.keyReleased = this.keyReleasedUpdateFN.bind(this);
+		game.addUpdateToQueue(this.keyHeldUpdateFn.bind(this));
+		game.keyHandler = this;
+	}
 
-    private keyPressedUpdateFn(){
-        const keypressed = this.game.canvas.key;
-        this.keysHeld.push(keypressed);
+	private keyPressedUpdateFn() {
+		const keypressed = this.game.canvas.key;
+		this.keysHeld.push(keypressed);
 
-        Object.keys(this.onKeyDownCallbacks).forEach(key => {
-            const allCallbacks = this.onKeyDownCallbacks[key];
-        
-            if (this.game.canvas.key === key){
-                allCallbacks.forEach(callback => {
-                    callback(this.game.canvas);
-                })
-            }
-        });
-    }
+		Object.keys(this.onKeyDownCallbacks).forEach((key) => {
+			const allCallbacks = this.onKeyDownCallbacks[key];
 
-    private keyReleasedUpdateFN(){
-        const keyreleased = this.game.canvas.key;
-        this.keysHeld = this.keysHeld.filter(k => k !== keyreleased);
-        Object.keys(this.onKeyUpCallbacks).forEach(key => {
-            const allCallbacks = this.onKeyUpCallbacks[key];
-        
-            if (this.game.canvas.key === key){
-                allCallbacks.forEach(callback => {
-                    callback(this.game.canvas);
-                })
-            }
-        });
-    }
+			if (this.game.canvas.key === key) {
+				allCallbacks.forEach((callback) => {
+					callback(this.game.canvas);
+				});
+			}
+		});
+	}
 
-    private keyHeldUpdateFn(){
-        Object.keys(this.onKeyHeldCallbacks).forEach(key => {
-            const allCallbacks = this.onKeyHeldCallbacks[key];
-        
-            if (this.keysHeld.includes(key)){
-                allCallbacks.forEach(callback => {
-                    callback(this.game.canvas);
-                })
-            }
-        });
-    }
+	private keyReleasedUpdateFN() {
+		const keyreleased = this.game.canvas.key;
+		this.keysHeld = this.keysHeld.filter((k) => k !== keyreleased);
+		Object.keys(this.onKeyUpCallbacks).forEach((key) => {
+			const allCallbacks = this.onKeyUpCallbacks[key];
 
-    private onKeyDown(key: string, callback: keyCallbackFn){
-        if (!this.onKeyDownCallbacks[key]) this.onKeyDownCallbacks[key] = [];
-        this.onKeyDownCallbacks[key].push(callback);
-    }
+			if (this.game.canvas.key === key) {
+				allCallbacks.forEach((callback) => {
+					callback(this.game.canvas);
+				});
+			}
+		});
+	}
 
-    private onKeyUp(key: string, callback: keyCallbackFn){
-        if (!this.onKeyUpCallbacks[key]) this.onKeyUpCallbacks[key] = [];
-        this.onKeyUpCallbacks[key].push(callback);
-    }
+	private keyHeldUpdateFn() {
+		Object.keys(this.onKeyHeldCallbacks).forEach((key) => {
+			const allCallbacks = this.onKeyHeldCallbacks[key];
 
-    private onKeyHeld(key: string, callback: keyCallbackFn){
-        if (!this.onKeyHeldCallbacks[key]) this.onKeyHeldCallbacks[key] = [];
-        this.onKeyHeldCallbacks[key].push(callback);
-    }
+			if (this.keysHeld.includes(key)) {
+				allCallbacks.forEach((callback) => {
+					callback(this.game.canvas);
+				});
+			}
+		});
+	}
 
-    public addCallBackMap(event: KeyEvents, map: KeyCallbackMap){
-        const addMap = (adderFn: (key: string, cb: keyCallbackFn) => void) => {
-            Object.keys(map).forEach(key => {
-                adderFn(key, map[key]);
-            })
-        }
+	private onKeyDown(key: string, callback: keyCallbackFn) {
+		if (!this.onKeyDownCallbacks[key]) this.onKeyDownCallbacks[key] = [];
+		this.onKeyDownCallbacks[key].push(callback);
+	}
 
-        if (event === KeyEvents.KeyDown) addMap(this.onKeyDown.bind(this));
-        if (event === KeyEvents.KeyUp) addMap (this.onKeyUp.bind(this));
-        if (event === KeyEvents.KeyHeld) addMap( this.onKeyHeld.bind(this));
-    }
+	private onKeyUp(key: string, callback: keyCallbackFn) {
+		if (!this.onKeyUpCallbacks[key]) this.onKeyUpCallbacks[key] = [];
+		this.onKeyUpCallbacks[key].push(callback);
+	}
 
-    public addCallbackMapFromGameObject(gameObject: GameObject){
-        this.addCallBackMap(KeyEvents.KeyDown, gameObject._keyCallbackMap.keyDown);
-        this.addCallBackMap(KeyEvents.KeyHeld, gameObject._keyCallbackMap.keyHeld);
-        this.addCallBackMap(KeyEvents.KeyUp, gameObject._keyCallbackMap.keyUp);
+	private onKeyHeld(key: string, callback: keyCallbackFn) {
+		if (!this.onKeyHeldCallbacks[key]) this.onKeyHeldCallbacks[key] = [];
+		this.onKeyHeldCallbacks[key].push(callback);
+	}
 
-        const eventCbs = {
-            keyDown: this.onKeyDownCallbacks,
-            keyUp: this.onKeyUpCallbacks,
-            keyHeld: this.onKeyHeldCallbacks,
-        }
-    }
+	public addCallBackMap(event: KeyEvents, map: KeyCallbackMap) {
+		const addMap = (adderFn: (key: string, cb: keyCallbackFn) => void) => {
+			Object.keys(map).forEach((key) => {
+				adderFn(key, map[key]);
+			});
+		};
+
+		if (event === KeyEvents.KeyDown) addMap(this.onKeyDown.bind(this));
+		if (event === KeyEvents.KeyUp) addMap(this.onKeyUp.bind(this));
+		if (event === KeyEvents.KeyHeld) addMap(this.onKeyHeld.bind(this));
+	}
+
+	public addCallbackMapFromGameObject(gameObject: GameObject) {
+		this.addCallBackMap(KeyEvents.KeyDown, gameObject._keyCallbackMap.keyDown);
+		this.addCallBackMap(KeyEvents.KeyHeld, gameObject._keyCallbackMap.keyHeld);
+		this.addCallBackMap(KeyEvents.KeyUp, gameObject._keyCallbackMap.keyUp);
+	}
+
+	public addCallbackMapFromCurrentScene() {
+		const allGameObjects = this.game.sceneManager.getAllGameObjectsInCurrentScene();
+		allGameObjects.forEach((go) => this.addCallbackMapFromGameObject(go));
+	}
 }
 
 export default KeyPressedEventManager;

@@ -9,6 +9,10 @@ class BouncingSquare extends GameObject {
 	width: number;
 	height: number;
 
+	jumpCount: number;
+	maxJumps: number;
+	jumpRequest?: NodeJS.Timeout;
+
 	constructor(game: Game) {
 		super(game);
 
@@ -16,6 +20,9 @@ class BouncingSquare extends GameObject {
 		this.width = 10;
 		this.height = 10;
 		this.solid = true;
+
+		this.maxJumps = 2;
+		this.jumpCount = this.maxJumps;
 
 		this.hitboxes.push(
 			new Hitbox(this, HitboxType.square, {
@@ -25,12 +32,39 @@ class BouncingSquare extends GameObject {
 			})
 		);
 
+		this.keyCallbackMap = {
+			keyDown: {
+				[' ']: this.requestJump.bind(this)
+			}
+		};
+
 		this.setGravity(1);
-		console.log(this);
+	}
+
+	requestJump() {
+		if (this.jumpCount > 0) return this.jump();
+		this.jumpRequest = setTimeout(() => {
+			this.clearJumpRequest();
+		}, 100);
+	}
+
+	jump() {
+		if (this.jumpRequest) {
+			this.clearJumpRequest();
+		}
+		this.velocityAsVector = new Vector2D(0, -2);
+		this.jumpCount--;
+		return true;
+	}
+
+	clearJumpRequest() {
+		if (this.jumpRequest) clearInterval(this.jumpRequest);
+		this.jumpRequest = undefined;
 	}
 
 	handleCollision(other: GameObject, sides: CollisionSides) {
 		if (other.is(Wall)) {
+			this.jumpCount = this.maxJumps;
 			return this.bounce(sides, 0.8);
 		}
 		return false;
@@ -43,7 +77,6 @@ class BouncingSquare extends GameObject {
 
 	onLeftMouseButtonUp() {
 		this.velocityAsVector = new Vector2D(0, 0);
-		this.beingDragged = false;
 	}
 
 	render(canvas: Game['canvas']) {

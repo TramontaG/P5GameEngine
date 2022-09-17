@@ -141,6 +141,12 @@ class GameObject {
 		this.disableMovement = false;
 	}
 
+	/**
+	 * Return true if the next movement should be ignored in the next update function;
+	 * @param sides
+	 * @param bouncynessCoeficient
+	 * @returns
+	 */
 	private checkCollision() {
 		const activatedCbs: (() => boolean)[] = [];
 
@@ -202,6 +208,13 @@ class GameObject {
 	render(canvas: Game['canvas']) {}
 	beforeRender(canvas: Game['canvas']) {}
 
+	/**
+	 * Return true if the collision causes some movement.
+	 * Return false if otherwise.
+	 * @param other
+	 * @param sides
+	 * @returns
+	 */
 	handleCollision(other: GameObject, sides: CollisionSides) {
 		return false;
 	}
@@ -220,9 +233,19 @@ class GameObject {
 
 	onLeftMouseButtonDown(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {}
 	onLeftMouseButtonHeld(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {}
+
+	_onLeftMouseButtonUp(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {
+		this.beingDragged = false;
+		this.onLeftMouseButtonUp(canvas, mousePos, e);
+	}
 	onLeftMouseButtonUp(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {}
 	onRightMouseButtonDown(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {}
 	onRightMouseButtonHeld(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {}
+
+	_onRightMouseButtonUp(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {
+		this.beingDragged = false;
+		this.onRightMouseButtonUp(canvas, mousePos, e);
+	}
 	onRightMouseButtonUp(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {}
 
 	_onLeftDragMe(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {

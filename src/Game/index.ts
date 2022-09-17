@@ -1,76 +1,87 @@
 import GameObject from '../gameObject';
 import p5 from 'p5';
 import SceneManager from '../Scenes/SceneManager';
-import * as Logger from "../utils/Debugger";
+import * as Logger from '../utils/Debugger';
+import KeyPressedEventManager from '../eventManagers/keyPressed';
 
 type GameOptions = {
-    width: number;
-    height: number;
-    fps?: number;
-}
+	width: number;
+	height: number;
+	fps?: number;
+};
 
 type UpdateFn = () => any;
 
-type GameCanvas = p5
+type GameCanvas = p5;
 
 class Game {
-    canvas: GameCanvas;
-    gameReady: Promise<boolean>
-    updateQueue: UpdateFn[];
-    private sceneManagerInsance?: SceneManager;
+	canvas: GameCanvas;
+	gameReady: Promise<boolean>;
+	updateQueue: UpdateFn[];
 
-    private resolver?: (ready: boolean) => any;
+	_keyHandler?: KeyPressedEventManager;
 
-    constructor(options: GameOptions){
-        this.gameReady = new Promise<boolean>(resolve => {
-            this.resolver = resolve;
-        })
+	private sceneManagerInsance?: SceneManager;
 
-        document.getElementById('root')?.addEventListener("contextmenu", e => e.preventDefault());
+	private resolver?: (ready: boolean) => any;
 
-        const canvas = new p5((game: p5) => {
-            game.setup = () => {
-                game.resizeCanvas(options.width, options.height, false);
-                game.background(0);
-                this.setGameReady(this.resolver);
-            }
-            game.draw = this.updateFn.bind(this);
-            game.frameRate(options.fps || 60);
+	constructor(options: GameOptions) {
+		this.gameReady = new Promise<boolean>((resolve) => {
+			this.resolver = resolve;
+		});
 
-            return game;
-        }, document.getElementById('root') as HTMLElement);
-        
-        canvas.createCanvas(options.width, options.height);
-        
-        this.canvas = canvas;
-        this.updateQueue = [];
-    }
+		document.getElementById('root')?.addEventListener('contextmenu', (e) => e.preventDefault());
 
-    public get sceneManager() {
-        return this.sceneManagerInsance as SceneManager;
-    }
+		const canvas = new p5((game: p5) => {
+			game.setup = () => {
+				game.resizeCanvas(options.width, options.height, false);
+				game.background(0);
+				this.setGameReady(this.resolver);
+			};
+			game.draw = this.updateFn.bind(this);
+			game.frameRate(options.fps || 60);
 
-    public set sceneManager(sm: SceneManager){
-        this.sceneManagerInsance = sm;
-    }
+			return game;
+		}, document.getElementById('root') as HTMLElement);
 
-    public addUpdateToQueue(update: UpdateFn){
-        this.updateQueue.push(update);
-    }
+		canvas.createCanvas(options.width, options.height);
 
-    private setGameReady(resolve?: (ready: boolean) => any) {
-        resolve?.(true);
-    }
+		this.canvas = canvas;
+		this.updateQueue = [];
+	}
 
-    private updateFn() {
-        Logger.update();
-        this.updateQueue.forEach(update => update());
-    }
+	get keyHandler() {
+		return this._keyHandler as KeyPressedEventManager;
+	}
 
-    set fps(fps: number) {
-        this.canvas.frameRate(fps)
-    }
+	set keyHandler(keyHanlder) {
+		this._keyHandler = keyHanlder;
+	}
 
+	public get sceneManager() {
+		return this.sceneManagerInsance as SceneManager;
+	}
+
+	public set sceneManager(sm: SceneManager) {
+		this.sceneManagerInsance = sm;
+	}
+
+	public addUpdateToQueue(update: UpdateFn) {
+		this.updateQueue.push(update);
+	}
+
+	private setGameReady(resolve?: (ready: boolean) => any) {
+		resolve?.(true);
+	}
+
+	private updateFn() {
+		Logger.update();
+		this.updateQueue.forEach((update) => update());
+	}
+
+	set fps(fps: number) {
+		this.canvas.frameRate(fps);
+	}
 }
 
 export default Game;
