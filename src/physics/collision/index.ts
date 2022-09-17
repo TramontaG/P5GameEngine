@@ -1,3 +1,4 @@
+import Vector2D from '../../math/vector2d';
 import Hitbox, { HitboxType } from '../../gameObject/hitbox';
 
 export type CollisionSides = {
@@ -18,7 +19,6 @@ const collideSquareWithSquare = (sq1: Hitbox, sq2: Hitbox) => {
 	const sq2Bounds = getSquareBounds(sq2);
 
 	const horizontalOverlap = sq1Bounds.rightBound > sq2Bounds.leftBound && sq1Bounds.leftBound < sq2Bounds.rightBound;
-
 	const verticalOverlap = sq1Bounds.lowerBound > sq2Bounds.upperBound && sq1Bounds.upperBound < sq2Bounds.lowerBound;
 
 	if (verticalOverlap && horizontalOverlap) {
@@ -36,6 +36,15 @@ const collideSquareWithSquare = (sq1: Hitbox, sq2: Hitbox) => {
 	}
 
 	return undefined;
+};
+
+export const collideSquareWithPoint = (sq1: Hitbox, point: Vector2D) => {
+	const sq1Bounds = getSquareBounds(sq1);
+
+	const verticalOverlap = point.x > sq1Bounds.leftBound && point.x < sq1Bounds.rightBound;
+	const horizontalOverlap = point.y > sq1Bounds.upperBound && point.y < sq1Bounds.lowerBound;
+
+	return verticalOverlap && horizontalOverlap;
 };
 
 const getSquareBounds = (hb: Hitbox) => {

@@ -3,7 +3,7 @@ import Game from '../game';
 import { KeyCallbackMap } from '../eventManagers/keyPressed/models';
 import { KeyEvents } from '../eventManagers/keyPressed';
 import Hitbox from './hitbox';
-import { checkCollisionBetween, CollisionSides } from '../physics/collision';
+import { checkCollisionBetween, collideSquareWithPoint, CollisionSides } from '../physics/collision';
 import { Class } from '../utils/Models';
 import { resultingForce } from '../physics/forces';
 
@@ -30,6 +30,7 @@ class GameObject {
 	private _rotationAngle: Vector2D;
 	private _velocityVector: Vector2D;
 	private _bouncynessCoeficient: number;
+	protected disableMovement: boolean;
 
 	id: string;
 
@@ -53,6 +54,7 @@ class GameObject {
 		this.hitboxes = [];
 		this.forces = {};
 		this._bouncynessCoeficient = 1;
+		this.disableMovement = false;
 	}
 
 	set keyCallbackMap(map: {
@@ -119,12 +121,18 @@ class GameObject {
 	}
 
 	_update() {
-		this.position = this.position.add(this._velocityVector);
-		const shouldStopMovement = this.checkCollision();
-		if (!shouldStopMovement)
-			this.velocityAsVector = this.velocityAsVector.add(resultingForce(Object.values(this.forces)));
+		if (!this.disableMovement) {
+			this.position = this.position.add(this._velocityVector);
+		}
+
+		if (!this.checkCollision())
+			if (!this.disableMovement) {
+				this.velocityAsVector = this.velocityAsVector.add(resultingForce(Object.values(this.forces)));
+			}
+
 		this.update();
 		this.checkOutOfScreen();
+		this.disableMovement = false;
 	}
 
 	private checkCollision() {
@@ -191,12 +199,37 @@ class GameObject {
 	}
 	handleExitScreen() {}
 
+	spawn(gameObject: GameObject) {
+		const myLayer = this.getCurrentScene().getLayersWithGameObject(this)[0];
+		myLayer.registerGameObject(gameObject.id, gameObject);
+	}
+
+	protected isMouseOnMe(mousePos: Vector2D) {
+		return this.hitboxes.reduce((collided, hb) => {
+			return collideSquareWithPoint(hb, mousePos) || collided;
+		}, false);
+	}
+
 	onLeftMouseButtonDown(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {}
 	onLeftMouseButtonHeld(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {}
 	onLeftMouseButtonUp(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {}
 	onRightMouseButtonDown(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {}
 	onRightMouseButtonHeld(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {}
 	onRightMouseButtonUp(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {}
+
+	_onLeftDragMe(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {
+		if (this.isMouseOnMe(mousePos)) {
+			this.onLeftDragMe(canvas, mousePos, e);
+		}
+	}
+	onLeftDragMe(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {}
+
+	_onRightDragMe(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {
+		if (this.isMouseOnMe(mousePos)) {
+			this.onRightDragMe(canvas, mousePos, e);
+		}
+	}
+	onRightDragMe(canvas: Game['canvas'], mousePos: Vector2D, e?: MouseEvent) {}
 }
 
 export default GameObject;

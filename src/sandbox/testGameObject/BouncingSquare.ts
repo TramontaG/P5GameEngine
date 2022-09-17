@@ -29,9 +29,18 @@ class BouncingSquare extends GameObject {
 
 	handleCollision(other: GameObject, sides: CollisionSides) {
 		if (other.is(Wall)) {
-			return this.bounce(sides, 0.5);
+			return this.bounce(sides, 0.9);
 		}
 		return false;
+	}
+
+	onLeftDragMe(_: Game['canvas'], mousePos: Vector2D) {
+		this.disableMovement = true;
+		this.position = mousePos.copy();
+	}
+
+	onLeftMouseButtonUp() {
+		this.velocityAsVector = new Vector2D(0, 0);
 	}
 
 	render(canvas: Game['canvas']) {
