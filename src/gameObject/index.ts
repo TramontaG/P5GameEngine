@@ -35,12 +35,14 @@ class GameObject {
 	public beingDragged: boolean;
 	public solid: boolean;
 
+	private shouldNotDelete: boolean;
+
 	id: string;
 
 	constructor(gameInstance: Game, options?: initOptions) {
 		this.gameInstance = gameInstance;
 
-		this._rotationAngle = new Vector2D(0, -1);
+		this._rotationAngle = new Vector2D(0, 0);
 		this._velocity = 0;
 		this._velocityVector = new Vector2D(0, 0);
 		this.position = new Vector2D(0, 0);
@@ -61,6 +63,8 @@ class GameObject {
 		this.imovable = false;
 		this.beingDragged = false;
 		this.solid = false;
+
+		this.shouldNotDelete = false;
 	}
 
 	set keyCallbackMap(map: {
@@ -136,7 +140,7 @@ class GameObject {
 				this.velocityAsVector = this.velocityAsVector.add(resultingForce(Object.values(this.forces)));
 			}
 
-		this.update();
+		this.update(this.gameInstance.canvas);
 		this.checkOutOfScreen();
 		this.disableMovement = false;
 	}
@@ -163,7 +167,7 @@ class GameObject {
 			return shouldStopMovement || cb();
 		}, false);
 	}
-	update() {}
+	update(canvas: Game['canvas']) {}
 
 	bounce(sides: CollisionSides, bouncynessCoeficient = this._bouncynessCoeficient) {
 		if (sides.down) {
@@ -203,6 +207,10 @@ class GameObject {
 
 	protected delete() {
 		if (this.myLayer.gameObjects[this.id]) this.myLayer.unregisterGameObject(this.id);
+	}
+
+	public requestDeletion() {
+		if (!this.shouldNotDelete) this.delete();
 	}
 
 	render(canvas: Game['canvas']) {}

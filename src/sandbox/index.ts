@@ -2,10 +2,8 @@ import SceneManager from '../Scenes/SceneManager';
 import Game from '../game';
 import Layer from '../Scenes/Layer';
 import KeyPressedEventManager from '../eventManagers/keyPressed';
-import TestGameObject from './testGameObject';
-import PointerEventsManager from '../eventManagers/mouseClick';
-import Wall from './testGameObject/Wall';
-import BouncingSquare from './testGameObject/BouncingSquare';
+
+import Board from './PianoTiles/Board';
 
 const game = new Game({
 	height: 250,
@@ -14,10 +12,8 @@ const game = new Game({
 
 const sceneManager = new SceneManager(game);
 const keyPressedEventManager = new KeyPressedEventManager(game);
-const pointerEventsManager = new PointerEventsManager(game);
-const wall = new Wall(game);
-const bouncingSquare = new BouncingSquare(game);
-const myGameObject = new TestGameObject(game);
+
+const board = new Board(game);
 
 game.gameReady.then(() => {
 	sceneManager.createScene('scene1');
@@ -29,13 +25,11 @@ game.gameReady.then(() => {
 			beforeRender: (canvas) => {
 				canvas.background(0, 0, 0);
 			},
-			gameObjects: [myGameObject, wall, bouncingSquare]
+			gameObjects: [board]
 		})
 	);
 
 	keyPressedEventManager.addCallbackMapFromCurrentScene();
-	pointerEventsManager.addCallbackMapFromGameObject(myGameObject);
-	pointerEventsManager.addCallbackMapFromGameObject(bouncingSquare);
 });
 
 export default game;

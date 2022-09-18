@@ -100,12 +100,14 @@ const getSquareBounds = (hb: Hitbox) => {
 	const halfXSize = hb.xSize / 2;
 	const halfYSize = hb.ySize / 2;
 
-	return {
-		upperBound: pos.y - halfYSize,
-		leftBound: pos.x - halfXSize,
-		rightBound: pos.x + halfXSize,
-		lowerBound: pos.y + halfXSize
+	const bounds = {
+		upperBound: pos.y + hb.offset.y - halfYSize,
+		leftBound: pos.x + hb.offset.x - halfXSize,
+		rightBound: pos.x + hb.offset.x + halfXSize,
+		lowerBound: pos.y + hb.offset.y + halfXSize
 	};
+
+	return bounds;
 };
 
 const getHitboxPosition = (hb: Hitbox) => {
